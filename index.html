@@ -200,5 +200,36 @@
         <h3>Original Design (for triangle drawing assignment)</h3>
         <img id="drawingReference" alt="Triangle Drawing Reference" width="300">
     </div>
+
+    <script>
+        // Direct approach to make Download button work
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            console.log('Download button clicked!');
+            const canvas = document.getElementById('canvas');
+            const link = document.createElement('a');
+            link.download = 'webgl-painting.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+        
+        // Fix the Rainbow Mode Button
+        document.getElementById('rainbowModeBtn').addEventListener('click', function() {
+            console.log('Rainbow button clicked!');
+            window.rainbowMode = !window.rainbowMode;
+            this.textContent = window.rainbowMode ? 'Disable Rainbow' : 'Rainbow Mode';
+            this.style.backgroundColor = window.rainbowMode ? '#FF4081' : '#4CAF50';
+        });
+        
+        // Fix the Mini-Game Button
+        document.getElementById('startGameBtn').addEventListener('click', function() {
+            console.log('Game button clicked!');
+            if (window.shapeCatcherGame && typeof window.shapeCatcherGame.start === 'function') {
+                window.shapeCatcherGame.start();
+            } else {
+                console.error('Game function not found!');
+                alert('Sorry, the mini-game feature is not available at the moment!');
+            }
+        });
+    </script>
 </body>
 </html>
