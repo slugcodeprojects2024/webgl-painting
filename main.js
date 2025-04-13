@@ -511,7 +511,9 @@ window.onload = function() {
     });
     
     canvas.addEventListener('mousemove', function(event) {
-        handleMouseEvent(event, true);
+        if (isMouseDown) { // Only handle mouse move events when mouse is down
+            handleMouseEvent(event, true);
+        }
     });
     
     canvas.addEventListener('mouseup', function() {
