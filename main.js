@@ -11,6 +11,11 @@ let lastMousePos = { x: 0, y: 0 };
 let rainbowMode = false;
 let rainbowOffset = 0;
 
+// Add references to functions from advanced_features.js
+let animationManager; // Will be set by advanced_features.js
+let shapeCatcherGame; // Will be set by advanced_features.js
+let addAnimatedStroke; // Will be set by advanced_features.js
+
 // Class for generic Shape
 class Shape {
     constructor(type, vertices, color, size = 10, segments = 12, alpha = 1.0) {
@@ -573,6 +578,21 @@ window.onload = function() {
         img.src = 'sketch_placeholder.png'; // Replace with an actual image path
     });
     
+    // Add event listeners for Download, Rainbow Mode and Mini-Game buttons
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+        saveCanvasAsImage();
+    });
+    
+    document.getElementById('rainbowModeBtn').addEventListener('click', function() {
+        rainbowMode = !rainbowMode;
+        this.textContent = rainbowMode ? 'Disable Rainbow' : 'Rainbow Mode';
+        this.style.backgroundColor = rainbowMode ? '#FF4081' : '#4CAF50';
+    });
+    
+    document.getElementById('startGameBtn').addEventListener('click', function() {
+        shapeCatcherGame.start();
+    });
+    
     // Setup slider value displays
     setupSliderValueUpdates();
     
@@ -612,4 +632,4 @@ function updateButtonSelection(selectedBtnId) {
         document.getElementById(btnId).classList.remove('selected');
     });
     document.getElementById(selectedBtnId).classList.add('selected');
-}   
+}
