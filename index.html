@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL Painting</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        #canvas {
+            border: 1px solid #000;
+            background-color: #000;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 500px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .control-row label {
+            width: 120px;
+            font-weight: bold;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.selected {
+            background-color: #2196F3;
+        }
+        button#clearCanvas {
+            background-color: #f44336;
+        }
+        button#clearCanvas:hover {
+            background-color: #d32f2f;
+        }
+        button#drawPicture {
+            background-color: #9c27b0;
+        }
+        button#drawPicture:hover {
+            background-color: #7b1fa2;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .slider-container label {
+            width: 120px;
+            font-weight: bold;
+        }
+        .slider-container input {
+            flex-grow: 1;
+        }
+        .slider-value {
+            width: 30px;
+            text-align: right;
+            margin-left: 10px;
+        }
+        #awesomeFeatures {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px dashed #2196F3;
+            border-radius: 5px;
+            background-color: #e3f2fd;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebGL Painting Application</h1>
+    
+    <canvas id="canvas" width="500" height="500"></canvas>
+    
+    <div class="controls">
+        <div class="control-group">
+            <h3>Drawing Mode:</h3>
+            <div class="button-group">
+                <button id="pointsBtn" class="selected">Points</button>
+                <button id="trianglesBtn">Triangles</button>
+                <button id="circlesBtn">Circles</button>
+                <button id="clearCanvas">Clear Canvas</button>
+                <button id="drawPicture">Draw Picture</button>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h3>Shape Color:</h3>
+            <div class="slider-container">
+                <label for="redSlider">Red:</label>
+                <input type="range" id="redSlider" min="0" max="1" step="0.01" value="1">
+                <span class="slider-value" id="redValue">1.0</span>
+            </div>
+            <div class="slider-container">
+                <label for="greenSlider">Green:</label>
+                <input type="range" id="greenSlider" min="0" max="1" step="0.01" value="0">
+                <span class="slider-value" id="greenValue">0.0</span>
+            </div>
+            <div class="slider-container">
+                <label for="blueSlider">Blue:</label>
+                <input type="range" id="blueSlider" min="0" max="1" step="0.01" value="0">
+                <span class="slider-value" id="blueValue">0.0</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="slider-container">
+                <label for="sizeSlider">Shape Size:</label>
+                <input type="range" id="sizeSlider" min="1" max="50" value="10">
+                <span class="slider-value" id="sizeValue">10</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="slider-container">
+                <label for="segmentsSlider">Circle Segments:</label>
+                <input type="range" id="segmentsSlider" min="3" max="36" value="12">
+                <span class="slider-value" id="segmentsValue">12</span>
+            </div>
+        </div>
+        
+        <div id="awesomeFeatures">
+            <h3>Awesome Features:</h3>
+            <ul>
+                <li>Alpha transparency control for creating layered effects</li>
+                <li>Brush stroke alignment with movement direction</li>
+                <li>Continuous line drawing to fill gaps during mouse drag</li>
+                <li>Download your artwork as an image</li>
+            </ul>
+            <div class="slider-container">
+                <label for="alphaSlider">Transparency:</label>
+                <input type="range" id="alphaSlider" min="0" max="1" step="0.01" value="1">
+                <span class="slider-value" id="alphaValue">1.0</span>
+            </div>
+            <div class="button-group">
+                <button id="downloadBtn">Download Artwork</button>
+                <button id="rainbowModeBtn">Rainbow Mode</button>
+                <button id="startGameBtn" style="background-color: #FF9800;">Start Mini-Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vertex Shader -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 a_Position;
+        attribute vec4 a_Color;
+        uniform float u_PointSize;
+        varying vec4 v_Color;
+        void main() {
+            gl_Position = a_Position;
+            gl_PointSize = u_PointSize;
+            v_Color = a_Color;
+        }
+    </script>
+
+    <!-- Fragment Shader -->
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 v_Color;
+        void main() {
+            gl_FragColor = v_Color;
+        }
+    </script>
+
+    <script src="advanced_features.js"></script>
+    <script src="main.js"></script>
+    
+    <div id="inspirationImage" style="margin-top: 20px; display: none;">
+        <h3>Original Design (for triangle drawing assignment)</h3>
+        <img id="drawingReference" alt="Triangle Drawing Reference" width="300">
+    </div>
+</body>
+</html>
