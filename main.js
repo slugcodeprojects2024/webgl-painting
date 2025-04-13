@@ -314,16 +314,20 @@ function addShape(x, y, color, size, segments, alpha, dx = 0, dy = 0) {
         case 'triangle':
             // If we have direction info (from mouse drag), orient the triangle
             if (dx !== 0 || dy !== 0) {
-                // Calculate perpendicular direction
-                const perpX = -dy;
-                const perpY = dx;
-                const length = size / 100;
+                // Calculate perpendicular direction and normalize it
+                const magnitude = Math.sqrt(dx*dx + dy*dy);
+                const normalizedDx = dx / magnitude;
+                const normalizedDy = dy / magnitude;
                 
-                // Create oriented triangle vertices
+                const perpX = -normalizedDy;
+                const perpY = normalizedDx;
+                
+                // Create oriented triangle vertices with fixed size (not dependent on dx/dy magnitude)
+                const triSize = size / 100;
                 const vertices = [
                     [x, y], // Tip of the triangle
-                    [x - dx*length*2 + perpX*length, y - dy*length*2 + perpY*length],
-                    [x - dx*length*2 - perpX*length, y - dy*length*2 - perpY*length]
+                    [x - triSize * normalizedDx + triSize * perpX, y - triSize * normalizedDy + triSize * perpY],
+                    [x - triSize * normalizedDx - triSize * perpX, y - triSize * normalizedDy - triSize * perpY]
                 ];
                 
                 shapesList.push(new Triangle(vertices, color, size, alpha));
