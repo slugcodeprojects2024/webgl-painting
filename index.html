@@ -32,15 +32,6 @@
         .control-group {
             margin-bottom: 10px;
         }
-        .control-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .control-row label {
-            width: 120px;
-            font-weight: bold;
-        }
         .button-group {
             display: flex;
             gap: 10px;
@@ -164,9 +155,9 @@
                 <span class="slider-value" id="alphaValue">1.0</span>
             </div>
             <div class="button-group">
-                <button id="downloadBtn" onclick="saveCanvasAsImage()">Download Artwork</button>
-                <button id="rainbowModeBtn" onclick="toggleRainbowMode()">Rainbow Mode</button>
-                <button id="startGameBtn" onclick="shapeCatcherGame.start()" style="background-color: #FF9800;">Start Mini-Game</button>
+                <button id="downloadBtn">Download Artwork</button>
+                <button id="rainbowModeBtn">Rainbow Mode</button>
+                <button id="startGameBtn" style="background-color: #FF9800;">Start Mini-Game</button>
             </div>
         </div>
     </div>
@@ -193,45 +184,11 @@
         }
     </script>
 
-    <script src="advanced_features.js"></script>
     <script src="main.js"></script>
     
     <div id="inspirationImage" style="margin-top: 20px; display: none;">
         <h3>Original Design (for triangle drawing assignment)</h3>
         <img id="drawingReference" alt="Triangle Drawing Reference" width="300">
     </div>
-
-    <script>
-        // Make sure this script runs after everything else has loaded
-        window.addEventListener('load', function() {
-          console.log("Adding direct button handlers...");
-          
-          // Download button
-          document.getElementById('downloadBtn').addEventListener('click', function() {
-            console.log("Download button clicked");
-            // Direct implementation without relying on external functions
-            const canvas = document.getElementById('canvas');
-            const link = document.createElement('a');
-            link.download = 'webgl-painting.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-          });
-          
-          // Rainbow Mode button
-          document.getElementById('rainbowModeBtn').addEventListener('click', function() {
-            console.log("Rainbow button clicked");
-            // Direct implementation
-            window.rainbowMode = !window.rainbowMode;
-            this.textContent = window.rainbowMode ? 'Disable Rainbow' : 'Rainbow Mode';
-            this.style.backgroundColor = window.rainbowMode ? '#FF4081' : '#4CAF50';
-          });
-          
-          // Simple alert for Mini-Game button to avoid using unavailable functions
-          document.getElementById('startGameBtn').addEventListener('click', function() {
-            console.log("Game button clicked");
-            alert("The mini-game feature requires the WebGL rendering functions to be available.");
-          });
-        });
-    </script>
 </body>
 </html>

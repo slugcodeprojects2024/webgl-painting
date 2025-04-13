@@ -11,11 +11,6 @@ let lastMousePos = { x: 0, y: 0 };
 let rainbowMode = false;
 let rainbowOffset = 0;
 
-// Add references to functions from advanced_features.js
-let animationManager; // Will be set by advanced_features.js
-let shapeCatcherGame; // Will be set by advanced_features.js
-let addAnimatedStroke; // Will be set by advanced_features.js
-
 // Class for generic Shape
 class Shape {
     constructor(type, vertices, color, size = 10, segments = 12, alpha = 1.0) {
@@ -252,9 +247,6 @@ function canvasToGLCoord(x, y) {
 
 // Handle click/draw events
 function handleMouseEvent(event, isMove = false) {
-    // Don't draw if game is active
-    if (shapeCatcherGame.active) return;
-    
     // Get current settings
     const red = parseFloat(document.getElementById('redSlider').value);
     const green = parseFloat(document.getElementById('greenSlider').value);
@@ -292,22 +284,10 @@ function handleMouseEvent(event, isMove = false) {
                     currentPos.x, currentPos.y,
                     color, size / 10, alpha
                 ));
-                
-                // Add animated stroke for visual effect
-                addAnimatedStroke(
-                    lastMousePos.x, lastMousePos.y,
-                    currentPos.x, currentPos.y,
-                    color, size / 5
-                );
             }
             
             // Add the main shape based on current type
             addShape(currentPos.x, currentPos.y, color, size, segments, alpha, dx, dy);
-            
-            // Add particles for visual feedback
-            if (Math.random() < 0.3) { // Only add particles occasionally
-                animationManager.addParticleSystem(currentPos.x, currentPos.y, color, 10);
-            }
             
             // Update last position
             lastMousePos = { ...currentPos };
@@ -318,10 +298,6 @@ function handleMouseEvent(event, isMove = false) {
     } else {
         // For single clicks, just add the shape
         addShape(coords.x, coords.y, color, size, segments, alpha);
-        
-        // Add particles for visual feedback
-        animationManager.addParticleSystem(coords.x, coords.y, color, 15);
-        
         lastMousePos = { ...coords };
         
         // Render all shapes
@@ -519,14 +495,6 @@ function saveCanvasAsImage() {
     link.click();
 }
 
-// Add this function to handle the onclick event from HTML
-function toggleRainbowMode() {
-    rainbowMode = !rainbowMode;
-    const button = document.getElementById('rainbowModeBtn');
-    button.textContent = rainbowMode ? 'Disable Rainbow' : 'Rainbow Mode';
-    button.style.backgroundColor = rainbowMode ? '#FF4081' : '#4CAF50';
-}
-
 // Initialize everything when page loads
 window.onload = function() {
     // Setup WebGL
@@ -577,16 +545,9 @@ window.onload = function() {
     
     document.getElementById('drawPicture').addEventListener('click', function() {
         drawPicture();
-        
-        // Show the reference image section
-        document.getElementById('inspirationImage').style.display = 'block';
-        
-        // Create and display design sketch
-        const img = document.getElementById('drawingReference');
-        img.src = 'sketch_placeholder.png'; // Replace with an actual image path
     });
     
-    // Add event listeners for Download, Rainbow Mode and Mini-Game buttons
+    // Add event listeners for the advanced feature buttons
     document.getElementById('downloadBtn').addEventListener('click', function() {
         saveCanvasAsImage();
     });
@@ -595,10 +556,6 @@ window.onload = function() {
         rainbowMode = !rainbowMode;
         this.textContent = rainbowMode ? 'Disable Rainbow' : 'Rainbow Mode';
         this.style.backgroundColor = rainbowMode ? '#FF4081' : '#4CAF50';
-    });
-    
-    document.getElementById('startGameBtn').addEventListener('click', function() {
-        shapeCatcherGame.start();
     });
     
     // Setup slider value displays
@@ -623,13 +580,15 @@ function setupSliderValueUpdates() {
         const slider = document.getElementById(item.slider);
         const valueDisplay = document.getElementById(item.value);
         
-        // Update initial value
-        valueDisplay.textContent = slider.value;
-        
-        // Add event listener for changes
-        slider.addEventListener('input', function() {
-            valueDisplay.textContent = this.value;
-        });
+        if (slider && valueDisplay) {
+            // Update initial value
+            valueDisplay.textContent = slider.value;
+            
+            // Add event listener for changes
+            slider.addEventListener('input', function() {
+                valueDisplay.textContent = this.value;
+            });
+        }
     });
 }
 
@@ -641,3 +600,190 @@ function updateButtonSelection(selectedBtnId) {
     });
     document.getElementById(selectedBtnId).classList.add('selected');
 }
+
+// Simple mini-game functionality
+document.getElementById('startGameBtn').addEventListener('click', function() {
+    alert("Starting Shape Catcher mini-game!");
+    
+    // Save current state to restore later
+    const savedShapes = [...shapesList];
+    
+    // Clear canvas for the game
+    shapesList = [];
+    renderAllShapes();
+    
+    // Game variables
+    let score = 0;
+    let gameTime = 30; // seconds
+    let gameActive = true;
+    let fallingShapes = [];
+    
+    // Create game UI
+    const gameUI = document.createElement('div');
+    gameUI.id = 'gameUI';
+    gameUI.style.position = 'absolute';
+    gameUI.style.top = '20px';
+    gameUI.style.left = '50%';
+    gameUI.style.transform = 'translateX(-50%)';
+    gameUI.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    gameUI.style.color = 'white';
+    gameUI.style.padding = '10px';
+    gameUI.style.borderRadius = '5px';
+    gameUI.style.zIndex = '1000';
+    
+    const scoreDisplay = document.createElement('div');
+    scoreDisplay.textContent = 'Score: 0';
+    gameUI.appendChild(scoreDisplay);
+    
+    const timeDisplay = document.createElement('div');
+    timeDisplay.textContent = 'Time: 30s';
+    gameUI.appendChild(timeDisplay);
+    
+    document.body.appendChild(gameUI);
+    
+    // Create a basket
+    const basket = {
+        x: 0,
+        y: -0.8,
+        width: 0.2,
+        height: 0.1
+    };
+    
+    // Move basket with mouse
+    function moveBasket(event) {
+        if (!gameActive) return;
+        
+        const coords = canvasToGLCoord(event.clientX, event.clientY);
+        basket.x = coords.x;
+    }
+    
+    canvas.addEventListener('mousemove', moveBasket);
+    
+    // Spawn a falling shape
+    function spawnShape() {
+        const x = Math.random() * 1.8 - 0.9;
+        const y = 1.0;
+        
+        const r = Math.random();
+        const g = Math.random();
+        const b = Math.random();
+        
+        fallingShapes.push({
+            x: x,
+            y: y,
+            type: Math.random() > 0.5 ? 'circle' : 'triangle',
+            color: [r, g, b],
+            size: Math.random() * 15 + 5,
+            speed: Math.random() * 0.01 + 0.005
+        });
+    }
+    
+    // Update and render the game
+    function gameLoop() {
+        if (!gameActive) return;
+        
+        // Clear canvas
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        
+        // Draw basket
+        const basketVertices = [
+            [basket.x - basket.width/2, basket.y - basket.height/2],
+            [basket.x - basket.width/2, basket.y + basket.height/2],
+            [basket.x + basket.width/2, basket.y + basket.height/2],
+            
+            [basket.x - basket.width/2, basket.y - basket.height/2],
+            [basket.x + basket.width/2, basket.y + basket.height/2],
+            [basket.x + basket.width/2, basket.y - basket.height/2]
+        ];
+        
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(basketVertices.flat()), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Position);
+        gl.vertexAttrib4f(a_Color, 1.0, 1.0, 1.0, 1.0);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        gl.disableVertexAttribArray(a_Position);
+        
+        // Update falling shapes
+        for (let i = fallingShapes.length - 1; i >= 0; i--) {
+            const shape = fallingShapes[i];
+            
+            // Move shape down
+            shape.y -= shape.speed;
+            
+            // Draw shape
+            if (shape.type === 'circle') {
+                new Circle(shape.x, shape.y, shape.color, shape.size, 12, 1.0).render();
+            } else {
+                const sideLength = shape.size / 100;
+                const height = sideLength * Math.sqrt(3) / 2;
+                
+                const vertices = [
+                    [shape.x, shape.y + height/2],
+                    [shape.x - sideLength/2, shape.y - height/2],
+                    [shape.x + sideLength/2, shape.y - height/2]
+                ];
+                
+                new Triangle(vertices, shape.color, shape.size, 1.0).render();
+            }
+            
+            // Check if caught by basket
+            if (shape.y <= basket.y + basket.height/2 && 
+                shape.y >= basket.y - basket.height/2 &&
+                shape.x >= basket.x - basket.width/2 &&
+                shape.x <= basket.x + basket.width/2) {
+                
+                // Caught! Add score
+                score += 10;
+                scoreDisplay.textContent = `Score: ${score}`;
+                
+                // Remove shape
+                fallingShapes.splice(i, 1);
+                continue;
+            }
+            
+            // Remove shapes that are off-screen
+            if (shape.y < -1.2) {
+                fallingShapes.splice(i, 1);
+            }
+        }
+        
+        // Occasionally spawn new shapes
+        if (Math.random() < 0.05) {
+            spawnShape();
+        }
+        
+        // Update game time
+        gameTime -= 1/60; // Assuming 60fps
+        if (gameTime <= 0) {
+            endGame();
+            return;
+        }
+        
+        timeDisplay.textContent = `Time: ${Math.ceil(gameTime)}s`;
+        
+        // Continue game loop
+        requestAnimationFrame(gameLoop);
+    }
+    
+    function endGame() {
+        gameActive = false;
+        
+        // Show final score
+        alert(`Game Over! Your score: ${score}`);
+        
+        // Remove game UI
+        document.body.removeChild(gameUI);
+        
+        // Remove event listener
+        canvas.removeEventListener('mousemove', moveBasket);
+        
+        // Restore previous canvas state
+        shapesList = savedShapes;
+        renderAllShapes();
+    }
+    
+    // Start the game loop
+    gameLoop();
+});
