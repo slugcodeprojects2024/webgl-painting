@@ -504,23 +504,39 @@ window.onload = function() {
     // Connect variables to GLSL
     connectVariablesToGLSL();
     
-    // Setup event listeners
+    // Remove any existing mouse event listeners (if there are any)
+    canvas.removeEventListener('mousedown', null);
+    canvas.removeEventListener('mousemove', null);
+    canvas.removeEventListener('mouseup', null);
+    canvas.removeEventListener('mouseleave', null);
+
+    // Flag to track mouse state
+    isMouseDown = false;
+
+    // Setup fresh event listeners
     canvas.addEventListener('mousedown', function(event) {
+        console.log("Mouse down - starting to draw");
         isMouseDown = true;
         handleMouseEvent(event);
     });
-    
+
     canvas.addEventListener('mousemove', function(event) {
-        if (isMouseDown) { // Only handle mouse move events when mouse is down
+        // Only draw when mouse is down
+        if (isMouseDown) {
+            console.log("Mouse move with button down - drawing");
             handleMouseEvent(event, true);
+        } else {
+            console.log("Mouse move without button - not drawing");
         }
     });
-    
+
     canvas.addEventListener('mouseup', function() {
+        console.log("Mouse up - stopping drawing");
         isMouseDown = false;
     });
-    
+
     canvas.addEventListener('mouseleave', function() {
+        console.log("Mouse left canvas - stopping drawing");
         isMouseDown = false;
     });
     
