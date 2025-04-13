@@ -519,6 +519,14 @@ function saveCanvasAsImage() {
     link.click();
 }
 
+// Add this function to handle the onclick event from HTML
+function toggleRainbowMode() {
+    rainbowMode = !rainbowMode;
+    const button = document.getElementById('rainbowModeBtn');
+    button.textContent = rainbowMode ? 'Disable Rainbow' : 'Rainbow Mode';
+    button.style.backgroundColor = rainbowMode ? '#FF4081' : '#4CAF50';
+}
+
 // Initialize everything when page loads
 window.onload = function() {
     // Setup WebGL

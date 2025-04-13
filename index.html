@@ -164,9 +164,9 @@
                 <span class="slider-value" id="alphaValue">1.0</span>
             </div>
             <div class="button-group">
-                <button id="downloadBtn">Download Artwork</button>
-                <button id="rainbowModeBtn">Rainbow Mode</button>
-                <button id="startGameBtn" style="background-color: #FF9800;">Start Mini-Game</button>
+                <button id="downloadBtn" onclick="saveCanvasAsImage()">Download Artwork</button>
+                <button id="rainbowModeBtn" onclick="toggleRainbowMode()">Rainbow Mode</button>
+                <button id="startGameBtn" onclick="shapeCatcherGame.start()" style="background-color: #FF9800;">Start Mini-Game</button>
             </div>
         </div>
     </div>
