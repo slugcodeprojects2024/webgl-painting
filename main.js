@@ -274,8 +274,16 @@ function handleMouseEvent(event, isMove = false) {
         const dy = currentPos.y - lastMousePos.y;
         const distance = Math.sqrt(dx*dx + dy*dy);
         
+        // Adjust minimum distance based on shape type
+        let minDistance = 0.005; // Default minimum distance
+        
+        if (currentShapeType === 'triangle') {
+            // Increase minimum distance for triangles to avoid overcrowding
+            minDistance = 0.03; // Adjust this value as needed
+        }
+        
         // Only add a shape if we've moved a minimum distance (prevents too many shapes)
-        if (distance > 0.005) {
+        if (distance > minDistance) {
             // For continuous line drawing
             if (currentShapeType === 'point') {
                 // Create line for continuous point drawing
