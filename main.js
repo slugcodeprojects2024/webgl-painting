@@ -379,102 +379,83 @@ function getRainbowColor() {
     ];
 }
 
-// Draw a predefined picture using triangles
+// Modify or replace your existing drawPicture() function
 function drawPicture() {
-    // A simple tree picture
-    const treeColor = [0.2, 0.8, 0.2]; // Green
-    const trunkColor = [0.6, 0.4, 0.2]; // Brown
-    
-    // Tree trunk
-    shapesList.push(new Triangle(
-        [[-0.1, -0.3], [-0.1, 0.0], [0.1, 0.0]],
-        trunkColor, 10, 1.0
-    ));
-    shapesList.push(new Triangle(
-        [[-0.1, -0.3], [0.1, -0.3], [0.1, 0.0]],
-        trunkColor, 10, 1.0
-    ));
-    
-    // Tree foliage (multiple triangles)
-    // Bottom layer
-    shapesList.push(new Triangle(
-        [[0.0, 0.5], [-0.3, 0.0], [0.3, 0.0]],
-        treeColor, 10, 0.9
-    ));
-    
-    // Middle layer
-    shapesList.push(new Triangle(
-        [[0.0, 0.7], [-0.25, 0.2], [0.25, 0.2]],
-        treeColor, 10, 0.9
-    ));
-    
-    // Top layer
-    shapesList.push(new Triangle(
-        [[0.0, 0.9], [-0.2, 0.4], [0.2, 0.4]],
-        treeColor, 10, 0.9
-    ));
-    
-    // Ground/grass
-    shapesList.push(new Triangle(
-        [[-1.0, -1.0], [1.0, -1.0], [-1.0, -0.3]],
-        [0.4, 0.8, 0.3], 10, 1.0
-    ));
-    shapesList.push(new Triangle(
-        [[1.0, -1.0], [1.0, -0.3], [-1.0, -0.3]],
-        [0.4, 0.8, 0.3], 10, 1.0
-    ));
-    
-    // Sun
-    const sunColor = [1.0, 0.9, 0.0];
-    shapesList.push(new Triangle(
-        [[0.7, 0.7], [0.5, 0.5], [0.9, 0.5]],
-        sunColor, 10, 0.9
-    ));
-    shapesList.push(new Triangle(
-        [[0.7, 0.7], [0.5, 0.9], [0.9, 0.9]],
-        sunColor, 10, 0.9
-    ));
-    shapesList.push(new Triangle(
-        [[0.5, 0.9], [0.7, 0.7], [0.5, 0.5]],
-        sunColor, 10, 0.9
-    ));
-    shapesList.push(new Triangle(
-        [[0.9, 0.9], [0.7, 0.7], [0.9, 0.5]],
-        sunColor, 10, 0.9
-    ));
-    
-    // Sky background (light blue)
+    // Clear out any existing shapes on the canvas.
+    shapesList = [];
+
+    // Option 1: Randomly pick a scene each time.
+    const sceneChoice = Math.floor(Math.random() * 4); 
+    // 0 => Forest scene
+    // 1 => Beach scene
+    // 2 => Mountain scene
+    // 3 => Moonlit scene
+
+    switch(sceneChoice) {
+        case 0:
+            drawForestScene();
+            break;
+        case 1:
+            drawBeachScene();
+            break;
+        case 2:
+            drawMountainScene();
+            break;
+        case 3:
+            drawMoonlitScene();
+            break;
+    }
+
+    // Finally, render all shapes on the canvas
+    renderAllShapes();
+}
+
+/***********************
+ * HELPER SCENE FUNCTIONS
+ ***********************/
+
+/** 
+ * 1) Example: Forest Scene
+ *    Similar to your original tree scene, but we'll add 
+ *    a couple of extra trees or variations.
+ */
+function drawForestScene() {
+    // Sky
     shapesList.push(new Triangle(
         [[-1.0, 1.0], [1.0, 1.0], [-1.0, -0.3]],
-        [0.6, 0.8, 1.0], 10, 0.5
+        [0.6, 0.8, 1.0], 10, 1.0
     ));
     shapesList.push(new Triangle(
         [[1.0, 1.0], [1.0, -0.3], [-1.0, -0.3]],
-        [0.6, 0.8, 1.0], 10, 0.5
+        [0.6, 0.8, 1.0], 10, 1.0
     ));
-    
-    // Cloud 1 (multiple triangles)
+
+    // Ground
+    shapesList.push(new Triangle(
+        [[-1.0, -0.3], [1.0, -0.3], [-1.0, -1.0]],
+        [0.4, 0.8, 0.3], 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[1.0, -1.0], [1.0, -0.3], [-1.0, -1.0]],
+        [0.4, 0.8, 0.3], 10, 1.0
+    ));
+
+    // Tree 1 (center)
+    drawSimpleTree(0.0, -0.3);
+
+    // Tree 2 (left)
+    drawSimpleTree(-0.6, -0.3);
+
+    // Tree 3 (right)
+    drawSimpleTree(0.6, -0.3);
+
+    // Optional: Clouds or birds
+    // Clouds
     const cloudColor = [1.0, 1.0, 1.0];
-    shapesList.push(new Triangle(
-        [[-0.7, 0.7], [-0.5, 0.8], [-0.9, 0.8]],
-        cloudColor, 10, 0.8
-    ));
-    shapesList.push(new Triangle(
-        [[-0.7, 0.9], [-0.5, 0.8], [-0.9, 0.8]],
-        cloudColor, 10, 0.8
-    ));
+    shapesList.push(new Circle(-0.7, 0.7, cloudColor, 25, 16, 0.8));
+    shapesList.push(new Circle(-0.5, 0.7, cloudColor, 30, 16, 0.8));
     
-    // Cloud 2
-    shapesList.push(new Triangle(
-        [[-0.3, 0.6], [-0.1, 0.7], [-0.5, 0.7]],
-        cloudColor, 10, 0.8
-    ));
-    shapesList.push(new Triangle(
-        [[-0.3, 0.8], [-0.1, 0.7], [-0.5, 0.7]],
-        cloudColor, 10, 0.8
-    ));
-    
-    // Bird 1
+    // Birds
     const birdColor = [0.3, 0.3, 0.3];
     shapesList.push(new Triangle(
         [[-0.8, 0.4], [-0.7, 0.5], [-0.9, 0.5]],
@@ -483,20 +464,197 @@ function drawPicture() {
     shapesList.push(new Triangle(
         [[-0.6, 0.4], [-0.7, 0.5], [-0.8, 0.4]],
         birdColor, 10, 0.7
+     ));
+}
+
+/**
+ * 2) Beach Scene
+ *    Includes sky, ocean, and sand, plus a sun or palm tree.
+ */
+function drawBeachScene() {
+    // Sky
+    shapesList.push(new Triangle(
+        [[-1.0, 1.0], [1.0, 1.0], [-1.0, 0.0]],
+        [0.6, 0.8, 1.0], 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[1.0, 1.0], [1.0, 0.0], [-1.0, 0.0]],
+        [0.6, 0.8, 1.0], 10, 1.0
+    ));
+
+    // Ocean (blue band)
+    shapesList.push(new Triangle(
+        [[-1.0, 0.0], [1.0, 0.0], [-1.0, -0.3]],
+        [0.2, 0.4, 0.8], 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[1.0, -0.3], [1.0, 0.0], [-1.0, -0.3]],
+        [0.2, 0.4, 0.8], 10, 1.0
     ));
     
-    // Bird 2
+    // Sand (light tan)
     shapesList.push(new Triangle(
-        [[-0.5, 0.3], [-0.4, 0.4], [-0.6, 0.4]],
-        birdColor, 10, 0.7
+        [[-1.0, -1.0], [1.0, -1.0], [-1.0, -0.3]],
+        [0.94, 0.86, 0.67], 10, 1.0
     ));
     shapesList.push(new Triangle(
-        [[-0.3, 0.3], [-0.4, 0.4], [-0.5, 0.3]],
-        birdColor, 10, 0.7
+        [[1.0, -0.3], [1.0, -1.0], [-1.0, -0.3]],
+        [0.94, 0.86, 0.67], 10, 1.0
+    ));
+
+    // Sun (Circle)
+    shapesList.push(new Circle(0.8, 0.8, [1.0, 0.9, 0.0], 30, 24, 1.0));
+
+    // Palm tree
+    const trunkColor = [0.6, 0.4, 0.2];
+    // Trunk
+    shapesList.push(new Triangle(
+        [[-0.6, -0.3], [-0.6, 0.0], [-0.5, 0.0]],
+        trunkColor, 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[-0.6, -0.3], [-0.5, -0.3], [-0.5, 0.0]],
+        trunkColor, 10, 1.0
     ));
     
-    // Render all shapes
-    renderAllShapes();
+    // Palm leaves
+    const leafColor = [0.0, 0.6, 0.0];
+    shapesList.push(new Triangle(
+        [[-0.55, 0.0], [-0.8, 0.2], [-0.3, 0.2]],
+        leafColor, 10, 0.9
+    ));
+    shapesList.push(new Triangle(
+        [[-0.55, 0.0], [-0.9, 0.1], [-0.7, 0.0]],
+        leafColor, 10, 0.9
+    ));
+    shapesList.push(new Triangle(
+        [[-0.55, 0.0], [-0.2, 0.1], [-0.4, 0.0]],
+        leafColor, 10, 0.9
+    ));
+    shapesList.push(new Triangle(
+        [[-0.55, 0.0], [-0.7, -0.1], [-0.4, -0.1]],
+        leafColor, 10, 0.9
+    ));
+}
+
+/**
+ * 3) Mountain Scene
+ *    Overlapping triangles of different colors to create a mountain range.
+ */
+function drawMountainScene() {
+    // Light sky background
+    shapesList.push(new Triangle(
+        [[-1.0, 1.0], [1.0, 1.0], [-1.0, -0.5]],
+        [0.6, 0.8, 1.0], 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[1.0, 1.0], [1.0, -0.5], [-1.0, -0.5]],
+        [0.6, 0.8, 1.0], 10, 1.0
+    ));
+
+    // Distant mountains
+    shapesList.push(new Triangle(
+        [[-1.0, -0.5], [-0.4, 0.4], [0.2, -0.5]],
+        [0.3, 0.3, 0.3], 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[-0.2, -0.5], [0.5, 0.5], [1.0, -0.5]],
+        [0.35, 0.35, 0.35], 10, 1.0
+    ));
+
+    // Foreground ground
+    shapesList.push(new Triangle(
+        [[-1.0, -0.5], [1.0, -0.5], [-1.0, -1.0]],
+        [0.4, 0.7, 0.4], 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[1.0, -1.0], [1.0, -0.5], [-1.0, -1.0]],
+        [0.4, 0.7, 0.4], 10, 1.0
+    ));
+    
+    // Snow caps
+    shapesList.push(new Triangle(
+        [[-0.48, 0.25], [-0.4, 0.4], [-0.32, 0.25]],
+        [1.0, 1.0, 1.0], 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[0.42, 0.35], [0.5, 0.5], [0.58, 0.35]],
+        [1.0, 1.0, 1.0], 10, 1.0
+    ));
+    
+    // Add a small lake
+    shapesList.push(new Circle(0.0, -0.7, [0.1, 0.3, 0.8], 30, 24, 0.8));
+}
+
+/**
+ * 4) Moonlit Scene
+ *    Dark sky, moon, a few stars, maybe silhouettes of trees.
+ */
+function drawMoonlitScene() {
+    // Dark sky
+    shapesList.push(new Triangle(
+        [[-1.0, 1.0], [1.0, 1.0], [-1.0, -1.0]],
+        [0.05, 0.05, 0.2], 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[1.0, 1.0], [1.0, -1.0], [-1.0, -1.0]],
+        [0.05, 0.05, 0.2], 10, 1.0
+    ));
+
+    // Moon (white-yellow circle)
+    shapesList.push(new Circle(0.7, 0.7, [1.0, 0.95, 0.8], 40, 24, 1.0));
+
+    // Stars: small circles or points
+    shapesList.push(new Circle(-0.8, 0.9, [1.0, 1.0, 1.0], 5, 12, 1.0));
+    shapesList.push(new Circle(-0.2, 0.8, [1.0, 1.0, 1.0], 5, 12, 1.0));
+    shapesList.push(new Circle(0.2, 0.9, [1.0, 1.0, 1.0], 5, 12, 1.0));
+    shapesList.push(new Circle(0.9, 0.6, [1.0, 1.0, 1.0], 5, 12, 1.0));
+
+    // Silhouette ground
+    shapesList.push(new Triangle(
+        [[-1.0, -0.6], [1.0, -0.6], [-1.0, -1.0]],
+        [0.1, 0.1, 0.1], 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[1.0, -1.0], [1.0, -0.6], [-1.0, -1.0]],
+        [0.1, 0.1, 0.1], 10, 1.0
+    ));
+
+    // Silhouette trees
+    drawSimpleTree(-0.5, -0.6, [0.1, 0.1, 0.1], [0.1, 0.15, 0.1]);
+    drawSimpleTree(0.3, -0.6, [0.1, 0.1, 0.1], [0.1, 0.15, 0.1]);
+    drawSimpleTree(-0.2, -0.6, [0.1, 0.1, 0.1], [0.1, 0.15, 0.1]);
+    drawSimpleTree(0.7, -0.6, [0.1, 0.1, 0.1], [0.1, 0.15, 0.1]);
+}
+
+/**
+ * Helper to draw a simple tree at (x, y). 
+ * Optionally pass in color for trunk/foliage if you want variation.
+ */
+function drawSimpleTree(x, y, trunkColor = [0.6, 0.4, 0.2], leavesColor = [0.2, 0.8, 0.2]) {
+    // Trunk (two triangles to form a rectangle)
+    shapesList.push(new Triangle(
+        [[x - 0.05, y], [x - 0.05, y + 0.2], [x + 0.05, y + 0.2]],
+        trunkColor, 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[x - 0.05, y], [x + 0.05, y,], [x + 0.05, y + 0.2]],
+        trunkColor, 10, 1.0
+    ));
+
+    // Foliage (three triangles, stacked)
+    shapesList.push(new Triangle(
+        [[x, y + 0.5], [x - 0.15, y + 0.2], [x + 0.15, y + 0.2]],
+        leavesColor, 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[x, y + 0.35], [x - 0.12, y + 0.15], [x + 0.12, y + 0.15]],
+        leavesColor, 10, 1.0
+    ));
+    shapesList.push(new Triangle(
+        [[x, y + 0.25], [x - 0.1, y + 0.05], [x + 0.1, y + 0.05]],
+        leavesColor, 10, 1.0
+    ));
 }
 
 // Function to save canvas as an image
