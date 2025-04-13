@@ -202,34 +202,217 @@
     </div>
 
     <script>
-        // Direct approach to make Download button work
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            console.log('Download button clicked!');
+        // Make sure this script runs after everything else has loaded
+        window.addEventListener('load', function() {
+          console.log("Adding direct button handlers...");
+          
+          // Download button
+          document.getElementById('downloadBtn').addEventListener('click', function() {
+            console.log("Download button clicked");
+            // Direct implementation without relying on external functions
             const canvas = document.getElementById('canvas');
             const link = document.createElement('a');
             link.download = 'webgl-painting.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
-        });
-        
-        // Fix the Rainbow Mode Button
-        document.getElementById('rainbowModeBtn').addEventListener('click', function() {
-            console.log('Rainbow button clicked!');
+          });
+          
+          // Rainbow Mode button
+          document.getElementById('rainbowModeBtn').addEventListener('click', function() {
+            console.log("Rainbow button clicked");
+            // Direct implementation
             window.rainbowMode = !window.rainbowMode;
             this.textContent = window.rainbowMode ? 'Disable Rainbow' : 'Rainbow Mode';
             this.style.backgroundColor = window.rainbowMode ? '#FF4081' : '#4CAF50';
-        });
-        
-        // Fix the Mini-Game Button
-        document.getElementById('startGameBtn').addEventListener('click', function() {
-            console.log('Game button clicked!');
-            if (window.shapeCatcherGame && typeof window.shapeCatcherGame.start === 'function') {
-                window.shapeCatcherGame.start();
-            } else {
-                console.error('Game function not found!');
-                alert('Sorry, the mini-game feature is not available at the moment!');
+          });
+          
+          // Simple mini-game as fallback
+          document.getElementById('startGameBtn').addEventListener('click', function() {
+            console.log("Game button clicked");
+            
+            // Simple game fallback if the complex one isn't working
+            alert("Starting a simple shape catching game!");
+            
+            // Clean slate for the game
+            window.shapesList = [];
+            renderAllShapes();
+            
+            // Game variables
+            let score = 0;
+            let gameTime = 30;
+            let gameActive = true;
+            
+            // Create simple UI
+            const gameUI = document.createElement('div');
+            gameUI.id = 'gameUI';
+            gameUI.style.position = 'absolute';
+            gameUI.style.top = '20px';
+            gameUI.style.left = '50%';
+            gameUI.style.transform = 'translateX(-50%)';
+            gameUI.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            gameUI.style.color = 'white';
+            gameUI.style.padding = '10px';
+            gameUI.style.borderRadius = '5px';
+            gameUI.style.zIndex = '1000';
+            
+            const scoreDisplay = document.createElement('div');
+            scoreDisplay.textContent = 'Score: 0';
+            gameUI.appendChild(scoreDisplay);
+            
+            const timeDisplay = document.createElement('div');
+            timeDisplay.textContent = 'Time: 30s';
+            gameUI.appendChild(timeDisplay);
+            
+            document.body.appendChild(gameUI);
+            
+            // Create a basket
+            const basket = {
+              x: 0,
+              y: -0.8,
+              width: 0.2,
+              height: 0.1
+            };
+            
+            // Follow mouse with basket
+            const canvas = document.getElementById('canvas');
+            function moveBasket(event) {
+              if (!gameActive) return;
+              const rect = canvas.getBoundingClientRect();
+              const x = ((event.clientX - rect.left) / canvas.width) * 2 - 1;
+              basket.x = x;
             }
+            
+            canvas.addEventListener('mousemove', moveBasket);
+            
+            // Falling shapes
+            let fallingShapes = [];
+            
+            function spawnShape() {
+              if (!gameActive) return;
+              
+              // Random position at top
+              const x = Math.random() * 1.8 - 0.9;
+              
+              // Random color
+              const r = Math.random();
+              const g = Math.random();
+              const b = Math.random();
+              
+              // Add shape
+              fallingShapes.push({
+                x: x,
+                y: 1.0,
+                color: [r, g, b],
+                size: 20,
+                speed: Math.random() * 0.01 + 0.005
+              });
+            }
+            
+            // Game loop
+            function gameLoop() {
+              if (!gameActive) return;
+              
+              // Clear canvas
+              gl.clear(gl.COLOR_BUFFER_BIT);
+              
+              // Draw basket
+              const basketVertices = [
+                [basket.x - basket.width/2, basket.y - basket.height/2],
+                [basket.x - basket.width/2, basket.y + basket.height/2],
+                [basket.x + basket.width/2, basket.y + basket.height/2],
+                
+                [basket.x - basket.width/2, basket.y - basket.height/2],
+                [basket.x + basket.width/2, basket.y + basket.height/2],
+                [basket.x + basket.width/2, basket.y - basket.height/2]
+              ];
+              
+              const vertexBuffer = gl.createBuffer();
+              gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+              gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(basketVertices.flat()), gl.STATIC_DRAW);
+              gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+              gl.enableVertexAttribArray(a_Position);
+              gl.vertexAttrib4f(a_Color, 1.0, 1.0, 1.0, 1.0);
+              gl.drawArrays(gl.TRIANGLES, 0, 6);
+              gl.disableVertexAttribArray(a_Position);
+              
+              // Update and draw falling shapes
+              for (let i = 0; i < fallingShapes.length; i++) {
+                const shape = fallingShapes[i];
+                
+                // Move shape down
+                shape.y -= shape.speed;
+                
+                // Draw the shape as a circle
+                gl.vertexAttrib3f(a_Position, shape.x, shape.y, 0.0);
+                gl.vertexAttrib4f(a_Color, shape.color[0], shape.color[1], shape.color[2], 1.0);
+                gl.uniform1f(u_PointSize, shape.size);
+                gl.drawArrays(gl.POINTS, 0, 1);
+                
+                // Check if caught by basket
+                if (shape.y <= basket.y + basket.height/2 && 
+                    shape.y >= basket.y - basket.height/2 &&
+                    shape.x >= basket.x - basket.width/2 &&
+                    shape.x <= basket.x + basket.width/2) {
+                  
+                  // Caught! Add score
+                  score += 10;
+                  scoreDisplay.textContent = `Score: ${score}`;
+                  
+                  // Remove shape
+                  fallingShapes.splice(i, 1);
+                  i--;
+                  continue;
+                }
+                
+                // Remove shapes that are off-screen
+                if (shape.y < -1.2) {
+                  fallingShapes.splice(i, 1);
+                  i--;
+                }
+              }
+              
+              // Occasionally spawn new shapes
+              if (Math.random() < 0.05) {
+                spawnShape();
+              }
+              
+              // Update game time
+              gameTime -= 1/60; // Assuming 60fps
+              if (gameTime <= 0) {
+                endGame();
+                return;
+              }
+              
+              timeDisplay.textContent = `Time: ${Math.ceil(gameTime)}s`;
+              
+              // Continue game loop
+              requestAnimationFrame(gameLoop);
+            }
+            
+            function endGame() {
+              gameActive = false;
+              
+              // Show final score
+              alert(`Game Over! Your score: ${score}`);
+              
+              // Remove game UI
+              document.body.removeChild(gameUI);
+              
+              // Remove event listener
+              canvas.removeEventListener('mousemove', moveBasket);
+              
+              // Clear falling shapes
+              fallingShapes = [];
+              
+              // Reset canvas
+              renderAllShapes();
+            }
+            
+            // Start the game loop
+            gameLoop();
+          });
         });
     </script>
 </body>
 </html>
+``` 
