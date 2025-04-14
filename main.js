@@ -737,9 +737,9 @@ window.onload = function() {
         // Show the reference image section
         document.getElementById('inspirationImage').style.display = 'block';
         
-        // Set both reference images
-        document.getElementById('lineDrawingReference').src = 'Frylock linework.jpg';
-        document.getElementById('colorReference').src = 'Frylock reference.png';
+        // Use full URLs since these work when directly entered
+        document.getElementById('lineDrawingReference').src = "https://slugcodeprojects2024.github.io/webgl-painting/Frylock%20linework.jpg";
+        document.getElementById('colorReference').src = "https://slugcodeprojects2024.github.io/webgl-painting/Frylock%20reference.png";
     });
     
     // Add event listeners for the advanced feature buttons
