@@ -733,6 +733,13 @@ window.onload = function() {
     
     document.getElementById('drawPicture').addEventListener('click', function() {
         drawPicture();
+        
+        // Show the reference image section
+        document.getElementById('inspirationImage').style.display = 'block';
+        
+        // Set both reference images
+        document.getElementById('lineDrawingReference').src = 'Frylock linework.jpg';
+        document.getElementById('colorReference').src = 'Frylock reference.png';
     });
     
     // Add event listeners for the advanced feature buttons
